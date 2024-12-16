@@ -1,5 +1,5 @@
 import UserInfo from "@/components/UserInfo";
 
-export default function Dashboard() {
+export default function Profile() {
   return <UserInfo />;
 }

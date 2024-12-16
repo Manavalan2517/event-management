@@ -16,17 +16,30 @@ export default function RegisterForm() {
     e.preventDefault();
 
     if (!name || !email || !password) {
-      setError("All fields are necessary.");
+      setError("All fields are required.");
       return;
     }
 
+    // Append the domain to the email
+    let completeEmail;
+
+    if (email && email.includes("admin")) {
+      completeEmail = "admin";
+    } else if (email) {
+      completeEmail = `${email}@srmist.edu.in`;
+    } else {
+      // Handle the case when the email is not provided
+      completeEmail = null; // Or handle the error accordingly
+    }
+
     try {
+      // Check if user already exists
       const resUserExists = await fetch("/api/userExists", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: completeEmail }),
       });
 
       const { user } = await resUserExists.json();
@@ -36,6 +49,7 @@ export default function RegisterForm() {
         return;
       }
 
+      // Proceed with registration
       const res = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -43,7 +57,7 @@ export default function RegisterForm() {
         },
         body: JSON.stringify({
           name,
-          email,
+          email: completeEmail,
           password,
         }),
       });
@@ -92,14 +106,20 @@ export default function RegisterForm() {
             <label htmlFor="email" className="block text-gray-700 font-medium">
               Email
             </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder=""
+                required
+              />
+              <span className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500">
+                @srmist.edu.in
+              </span>
+            </div>
           </div>
 
           <div>
