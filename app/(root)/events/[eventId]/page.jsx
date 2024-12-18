@@ -6,39 +6,35 @@ import { ArrowLeft, Calendar, LucideLocate } from "lucide-react";
 import Link from "next/link";
 
 export default function EventDetailsPage() {
-  const { eventId } = useParams();
+  const { eventId } = useParams(); // Extract eventId from the URL
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State to manage button transitions
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
   useEffect(() => {
+    // Fetch the event data when the component mounts
     const fetchEvent = async () => {
       try {
         const response = await fetch(`/api/events/${eventId}`);
-        if (!response.ok) throw new Error("Event not found or failed to load.");
+
+        if (!response.ok) {
+          throw new Error("Event not found or failed to load.");
+        }
+
         const data = await response.json();
-        setEventData(data.event);
+        setEventData(data.event); // Set the event data
       } catch (err) {
+        console.error("Error fetching event:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    if (eventId) fetchEvent();
+    if (eventId) {
+      fetchEvent();
+    }
   }, [eventId]);
-
-  // Handle Register button click
-  const handleRegisterClick = () => {
-    setIsRegistering(true); // Trigger downward animation for Register
-    setTimeout(() => {
-      setShowConfirm(true); // Show Confirm button after Register disappears
-    }, 300); // Transition duration
-  };
 
   if (loading) {
     return (
@@ -47,9 +43,11 @@ export default function EventDetailsPage() {
       </div>
     );
   }
+
   if (error) {
     return <div className="text-center mt-20 text-red-500">Error: {error}</div>;
   }
+
   if (!eventData) {
     return (
       <div className="text-center mt-20 text-gray-500">
@@ -63,7 +61,9 @@ export default function EventDetailsPage() {
       {/* Back Button */}
       <div className="absolute top-5 left-3 z-10">
         <Link href="/dashboard">
-          <ArrowLeft className="text-white" />
+          <div className="h-[35px] w-[35px] bg-slate-700 flex justify-center items-center rounded-full cursor-pointer shadow-2xl">
+            <ArrowLeft className="text-white" />
+          </div>
         </Link>
       </div>
 
@@ -79,6 +79,7 @@ export default function EventDetailsPage() {
             {eventData.eventName}
           </p>
         </div>
+        <div className="absolute opacity-80 z-[0]" />
         <div className="z-[1] absolute bottom-[-20px] max-md:left-[31%] mx-2 text-center bg-white px-4 py-3 shadow-md rounded-2xl">
           <h1 className="font-semibold">Event Details</h1>
         </div>
@@ -128,31 +129,16 @@ export default function EventDetailsPage() {
           <h1 className="font-semibold text-lg">About Event</h1>
           <p>{eventData.eventDescription}</p>
         </div>
-      </div>
 
-      {/* Register Button */}
-      <div
-        className={`fixed bottom-0 left-0 w-full px-4 py-3 transition-transform duration-500 ${
-          isRegistering ? "translate-y-full" : "translate-y-0"
-        }`}
-      >
-        <button
-          onClick={handleRegisterClick}
-          className="w-full text-white py-3 bg-gradient-to-r from-[#5669FF] to-[#3A49F9] rounded-2xl font-semibold shadow-lg"
-        >
-          Register
-        </button>
-      </div>
-
-      {/* Confirm Button */}
-      <div
-        className={`fixed bottom-[-100px] left-0 w-full px-4 py-3 transition-transform duration-500 ${
-          showConfirm ? "translate-y-[-100px]" : "translate-y-full"
-        }`}
-      >
-        <button className="w-full text-white py-3 bg-[#3A49F9] rounded-2xl font-semibold shadow-lg">
-          Confirm
-        </button>
+        {/* Register Button */}
+        {/* Fixed Register Button */}
+        <div className="fixed bottom-0 left-0 w-full bg-opacity-70 px-5 bg-custom-gradient py-2">
+          <Link href={`/events/${eventId}/ticket`}>
+            <button className="w-full text-white py-3 bg-[#5669FF] rounded-2xl font-semibold shadow-lg">
+              Register
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );
