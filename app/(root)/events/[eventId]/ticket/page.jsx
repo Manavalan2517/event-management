@@ -1,15 +1,14 @@
 "use client";
 
-import { data } from "autoprefixer";
-import { ArrowLeft, Calendar, Locate, Timer, User } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useQRCode } from "next-qrcode";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const RegisterEventForm = () => {
-  const [ticketStatus, setTicketStatus] = useState("confirmed");
+  const [ticketStatus, setTicketStatus] = useState("active");
   const [message, setMessage] = useState("");
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,53 +17,48 @@ const RegisterEventForm = () => {
   const { data: session } = useSession();
   const email = session?.user?.email;
   const { Canvas } = useQRCode();
-    
+  const router = useRouter();
+
   useEffect(() => {
-    // Fetch the event data when the component mounts
     const fetchEvent = async () => {
       try {
         const response = await fetch(`/api/events/${eventId}`);
-        
+
         if (!response.ok) {
           throw new Error("Event not found or failed to load.");
         }
-  
+
         const data = await response.json();
-        setEventData(data.event); // Set the event data
+        setEventData(data.event);
       } catch (err) {
-        console.error("Error fetching event:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    
-    if (eventId) {
-      fetchEvent();
-    }
+
+    if (eventId) fetchEvent();
   }, [eventId]);
-  
-  
-  
-    if (loading) {
-      return (
-        <div className="text-center mt-20 text-gray-500">
-          Loading event details...
-        </div>
-      );
-    }
-  
-    if (error) {
-      return <div className="text-center mt-20 text-red-500">Error: {error}</div>;
-    }
-  
-    if (!eventData) {
-      return (
-        <div className="text-center mt-20 text-gray-500">
-          No event data available.
-        </div>
-      );
-    }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-center mt-20 text-red-500">Error: {error}</div>;
+  }
+
+  if (!eventData) {
+    return (
+      <div className="text-center mt-20 text-gray-500">
+        No event data available.
+      </div>
+    );
+  }
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -87,12 +81,11 @@ const RegisterEventForm = () => {
 
       if (response.ok) {
         setMessage("Event registered successfully!");
-        console.log("Updated User:", data.user);
+        router.push(`/events/${eventId}/success`);
       } else {
         setMessage(data.error || "Something went wrong.");
       }
     } catch (error) {
-      console.error("Error:", error);
       setMessage("Failed to register the event.");
     }
   };
@@ -123,7 +116,9 @@ const RegisterEventForm = () => {
             <div className="mt-2 p-3 grid grid-cols-2 gap-x-20 gap-y-4">
               <div>
                 <p className="text-[#757272] text-[12px]">Name</p>
-                <p className="text-white text-[15px]">{session?.user.name}</p>
+                <p className="text-white text-[15px]">
+                  {session?.user?.name || "Guest User"}
+                </p>
               </div>
               <div>
                 <p className="text-[#757272] text-[12px]">Event Id</p>
@@ -146,7 +141,7 @@ const RegisterEventForm = () => {
             <div className="flex justify-center">
               <div className="rounded-md h-[100px] w-[100px] bg-white flex justify-center items-center mt-5">
                 <Canvas
-                  text={"https://github.com/bunlong/next-qrcode"}
+                  text={`https://yourwebsite.com/event/${eventId}/ticket`}
                   options={{
                     errorCorrectionLevel: "M",
                     margin: 0,
@@ -162,12 +157,15 @@ const RegisterEventForm = () => {
       <div className="fixed bottom-0 left-0 w-full bg-opacity-70 px-5 bg-custom-gradient py-2">
         <button
           type="submit"
-          className="w-full text-white py-3 bg-[#5669FF] rounded-2xl font-semibold shadow-lg"
+          className="w-full text-white py-3 bg-[#5669FF] rounded-2xl font-semibold shadow-lg hover:bg-[#3A49F9] transition-all"
           onClick={handleRegister}
         >
           Register
         </button>
       </div>
+      {message && (
+        <div className="text-center mt-3 text-red-500">{message}</div>
+      )}
     </div>
   );
 };

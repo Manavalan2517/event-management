@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import User from "@/models/user";
 import { connectMongoDB } from "@/lib/mongodb";
 
-
 export async function POST(req) {
   try {
     const { email, eventId, ticketStatus = "pending" } = await req.json();
@@ -14,22 +13,24 @@ export async function POST(req) {
       );
     }
 
+    // Connect to MongoDB
     await connectMongoDB();
 
-    // Find the user by email and update registeredEvents
+    console.log("Registering event for:", { email, eventId, ticketStatus });
+
+    // Update the user's registered events
     const updatedUser = await User.findOneAndUpdate(
       { email },
-      {
-        $push: {
-          registeredEvents: { eventId, ticketStatus },
-        },
-      },
+      { $push: { registeredEvents: { eventId, ticketStatus } } },
       { new: true, runValidators: true }
     );
 
     if (!updatedUser) {
+      console.error("No user found with email:", email);
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
+
+    console.log("Updated user:", updatedUser);
 
     return NextResponse.json({
       success: true,
@@ -37,9 +38,9 @@ export async function POST(req) {
       user: updatedUser,
     });
   } catch (error) {
-    console.error("Error registering event:", error);
+    console.error("Error registering event:", error.message);
     return NextResponse.json(
-      { error: "Failed to register event. Please try again." },
+      { error: error.message || "Failed to register event. Please try again." },
       { status: 500 }
     );
   }

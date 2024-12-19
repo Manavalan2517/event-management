@@ -124,6 +124,23 @@ export default function EventDetailsPage() {
           </div>
         </div>
 
+        {/* Location */}
+        <div className="my-5">
+          <div className="relative">
+            <div className="flex justify-center ">
+              <iframe
+                title="Google Map Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3890.286255654467!2d80.0441051745444!3d12.824769818081506!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a52f70c95688435%3A0xfb2355e047e8b473!2sDr.%20T.P%20Ganesan%20Auditorium!5e0!3m2!1sen!2sin!4v1734546607774!5m2!1sen!2sin"
+                height="200"
+                className=" border-black rounded-md w-full"
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+
         {/* About Event */}
         <div className="mt-5 mb-20">
           <h1 className="font-semibold text-lg">About Event</h1>
@@ -131,7 +148,6 @@ export default function EventDetailsPage() {
         </div>
 
         {/* Register Button */}
-        {/* Fixed Register Button */}
         <div className="fixed bottom-0 left-0 w-full bg-opacity-70 px-5 bg-custom-gradient py-2">
           <Link href={`/events/${eventId}/ticket`}>
             <button className="w-full text-white py-3 bg-[#5669FF] rounded-2xl font-semibold shadow-lg">
